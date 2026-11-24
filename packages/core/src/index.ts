@@ -110,15 +110,17 @@ export class FleetValidator {
     }
 
     for (const ship of fleet.ships) {
-      if (!ship?.cells) continue;
+      if (!Array.isArray(ship?.cells)) continue;
       for (const cell of ship.cells) {
+        if (!cell) continue;
         for (let dx = -1; dx <= 1; dx++) {
           for (let dy = -1; dy <= 1; dy++) {
             if (dx === 0 && dy === 0) continue;
             const neighbor = `${cell.x + dx},${cell.y + dy}`;
-            if (occupied.has(neighbor) && !ship.cells.some((item) => `${item.x},${item.y}` === neighbor)) {
+            if (occupied.has(neighbor) && !ship.cells.some((item) => item && `${item.x},${item.y}` === neighbor)) {
               const touchingWithinOtherShip = fleet.ships.some((other) =>
-                other !== ship && other.cells.some((item) => `${item.x},${item.y}` === neighbor),
+                other !== ship && Array.isArray(other?.cells)
+                  && other.cells.some((item) => item && `${item.x},${item.y}` === neighbor),
               );
               if (touchingWithinOtherShip) errors.push('Ships may not touch');
             }
@@ -206,6 +208,7 @@ export interface ShotResult {
   outcome: ShotOutcome;
   sunkShipSize?: number;
   sunkShipId?: string;
+  sunkShipCells?: Coordinate[];
   gameEnded: boolean;
   winner: PlayerId | null;
   currentTurn: PlayerId;
@@ -284,10 +287,12 @@ export class GameSession {
   start(): PublicGameView {
     if (this.phase !== 'setup') throw new GameError('WRONG_PHASE', 'Game can only start from setup');
     const validator = new FleetValidator();
-    if (!this.humanFleet || !validator.validate(this.humanFleet).complete) {
+    const human = this.humanFleet && validator.validate(this.humanFleet);
+    const bot = this.botFleet && validator.validate(this.botFleet);
+    if (!human?.complete || !human.valid) {
       throw new GameError('INVALID_FLEET', 'Human fleet is incomplete or invalid');
     }
-    if (!this.botFleet || !validator.validate(this.botFleet).complete) {
+    if (!bot?.complete || !bot.valid) {
       throw new GameError('INVALID_FLEET', 'Bot fleet is incomplete or invalid');
     }
     this.phase = 'playing';
@@ -333,7 +338,7 @@ export class GameSession {
       coordinate: { ...coordinate },
       shooter,
       outcome,
-      ...(sunkShipSize !== undefined ? { sunkShipSize, sunkShipId } : {}),
+      ...(sunkShipSize !== undefined ? { sunkShipSize, sunkShipId, sunkShipCells: ship?.cells.map((cell) => ({ ...cell })) } : {}),
     };
     this.history.push(record);
 
@@ -352,7 +357,7 @@ export class GameSession {
       coordinate: { ...coordinate },
       shooter,
       outcome,
-      ...(sunkShipSize !== undefined ? { sunkShipSize, sunkShipId } : {}),
+      ...(sunkShipSize !== undefined ? { sunkShipSize, sunkShipId, sunkShipCells: ship?.cells.map((cell) => ({ ...cell })) } : {}),
       gameEnded: this.phase === 'finished',
       winner: this.winner,
       currentTurn: this.currentTurn,
@@ -368,18 +373,15 @@ export class GameSession {
   }
 
   getBotObservation(player: 'human' | 'bot' = 'bot'): BotObservation {
-    const botIsShooter = player === 'bot';
     const ownShots = this.history.filter((record) => record.shooter === player);
-    const sunkByBot = this.sunkBotShips;
-    const sunkByHuman = this.sunkHumanShips;
-    const enemyFleet = botIsShooter ? this.humanFleet : this.botFleet;
-    const sunkIds = botIsShooter ? sunkByBot : sunkByHuman;
-    const remainingEnemyShipSizes = enemyFleet?.ships
-      .filter((ship) => !sunkIds.has(ship.id))
-      .map((ship) => ship.cells.length) ?? [];
+    const remainingEnemyShipSizes: number[] = [...FLEET_SIZES];
+    for (const shot of ownShots) {
+      const index = remainingEnemyShipSizes.indexOf(shot.sunkShipSize ?? 0);
+      if (shot.outcome === 'sunk' && index >= 0) remainingEnemyShipSizes.splice(index, 1);
+    }
     return {
       rules: { boardSize: BOARD_SIZE, fleetSizes: [...FLEET_SIZES] },
-      ownShots: ownShots.map((record) => ({ ...record, coordinate: { ...record.coordinate } })),
+      ownShots: ownShots.map((record) => ({ ...record, coordinate: { ...record.coordinate }, ...(record.sunkShipCells && { sunkShipCells: record.sunkShipCells.map((cell) => ({ ...cell })) }) })),
       remainingEnemyShipSizes,
     };
   }
@@ -388,12 +390,17 @@ export class GameSession {
     return this.getBotObservation(player);
   }
 
+  playBotShot(): ShotResult | null {
+    if (this.phase !== 'playing' || this.currentTurn !== 'bot') return null;
+    return this.shoot('bot', this.bot.chooseShot(this.getBotObservation()));
+  }
+
   playBotTurn(): ShotResult[] {
     if (this.phase !== 'playing' || this.currentTurn !== 'bot') return [];
     const results: ShotResult[] = [];
     while (this.phase === 'playing' && this.currentTurn === 'bot') {
-      const coordinate = this.bot.chooseShot(this.getBotObservation('bot'));
-      results.push(this.shoot('bot', coordinate));
+      const shot = this.playBotShot();
+      if (shot) results.push(shot);
     }
     return results;
   }
@@ -409,7 +416,7 @@ export class GameSession {
       ownBoard,
       enemyBoard,
       winner: this.winner,
-      history: this.history.map((record) => ({ ...record, coordinate: { ...record.coordinate } })),
+      history: this.history.map((record) => ({ ...record, coordinate: { ...record.coordinate }, ...(record.sunkShipCells && { sunkShipCells: record.sunkShipCells.map((cell) => ({ ...cell })) }) })),
     };
   }
 

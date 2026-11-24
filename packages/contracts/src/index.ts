@@ -22,6 +22,7 @@ export interface ShotRecord {
   outcome: ShotOutcome;
   sunkShipSize?: number;
   sunkShipId?: string;
+  sunkShipCells?: Coordinate[];
 }
 
 export interface PublicCell {

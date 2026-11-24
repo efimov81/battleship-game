@@ -95,3 +95,14 @@ button:disabled {
   background: #526b86;
   margin: 10px auto;
 }
+.cell.last-hit {
+  outline: 2px solid #a82820;
+  outline-offset: -2px;
+  opacity: 1;
+}
+
+.cell.last-miss {
+  outline: 2px solid #2462a7;
+  outline-offset: -2px;
+  opacity: 1;
+}
