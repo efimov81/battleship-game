@@ -2,25 +2,57 @@ body {
   font-family: system-ui, sans-serif;
   margin: 0;
   background: #f3f6fa;
-  color: #172b42
+  color: #172b42;
 }
 
 main {
   max-width: 900px;
   margin: 2rem auto;
-  padding: 1rem
+  padding: 1rem;
 }
 
 section {
   display: inline-block;
   vertical-align: top;
-  margin-right: 2rem
+  margin-right: 2rem;
+}
+
+.controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+button {
+  border: 1px solid #839bb5;
+  border-radius: 4px;
+  background: white;
+  color: #172b42;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.boards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.status,
+.message {
+  min-height: 1.25rem;
+  font-weight: 600;
 }
 
 .board {
   display: grid;
   grid-template-columns: repeat(10, 28px);
-  gap: 2px
+  gap: 2px;
 }
 
 .cell {
@@ -28,5 +60,38 @@ section {
   height: 28px;
   background: #d7e2ee;
   border: 1px solid #aabbd0;
-  box-sizing: border-box
+  box-sizing: border-box;
+  padding: 0;
+  border-radius: 0;
+}
+
+.cell.enemy:not(:disabled) {
+  cursor: crosshair;
+}
+
+.cell.ship {
+  background: #6689ad;
+}
+
+.cell.hit {
+  background: #f5a623;
+}
+
+.cell.sunk {
+  background: #d84a4a;
+}
+
+.cell.miss {
+  background: #eef3f7;
+  position: relative;
+}
+
+.cell.miss::after {
+  content: "";
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #526b86;
+  margin: 10px auto;
 }

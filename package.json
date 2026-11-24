@@ -2,6 +2,7 @@
   "name": "battleship-starter",
   "private": true,
   "workspaces": [
+    "packages/*",
     "backend",
     "frontend"
   ],
