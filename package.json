@@ -1,0 +1,18 @@
+{
+  "name": "battleship-starter",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "build": "npm run build -w @battleship/contracts && npm run build -w @battleship/core && npm run build -w @battleship/backend && npm run build -w @battleship/frontend",
+    "test": "npm run test -w @battleship/core",
+    "dev:api": "npm run dev -w @battleship/backend",
+    "dev:web": "npm run start -w @battleship/frontend"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
