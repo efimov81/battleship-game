@@ -5,6 +5,7 @@ import type {
   GamePhase,
   PlayerId,
   PublicGameView,
+  PublicShipStatus,
   PublicCell,
   ShotOutcome,
   ShotRecord,
@@ -374,11 +375,9 @@ export class GameSession {
 
   getBotObservation(player: 'human' | 'bot' = 'bot'): BotObservation {
     const ownShots = this.history.filter((record) => record.shooter === player);
-    const remainingEnemyShipSizes: number[] = [...FLEET_SIZES];
-    for (const shot of ownShots) {
-      const index = remainingEnemyShipSizes.indexOf(shot.sunkShipSize ?? 0);
-      if (shot.outcome === 'sunk' && index >= 0) remainingEnemyShipSizes.splice(index, 1);
-    }
+    const remainingEnemyShipSizes = this.getTargetFleetStatus(ownShots)
+      .filter((ship) => !ship.sunk)
+      .map((ship) => ship.size);
     return {
       rules: { boardSize: BOARD_SIZE, fleetSizes: [...FLEET_SIZES] },
       ownShots: ownShots.map((record) => ({ ...record, coordinate: { ...record.coordinate }, ...(record.sunkShipCells && { sunkShipCells: record.sunkShipCells.map((cell) => ({ ...cell })) }) })),
@@ -415,9 +414,20 @@ export class GameSession {
       humanFleet: this.humanFleet ? this.cloneFleet(this.humanFleet) : null,
       ownBoard,
       enemyBoard,
+      enemyFleetStatus: this.getTargetFleetStatus(this.history.filter((shot) => shot.shooter === 'human')),
       winner: this.winner,
       history: this.history.map((record) => ({ ...record, coordinate: { ...record.coordinate }, ...(record.sunkShipCells && { sunkShipCells: record.sunkShipCells.map((cell) => ({ ...cell })) }) })),
     };
+  }
+
+  private getTargetFleetStatus(shots: ShotRecord[]): PublicShipStatus[] {
+    const fleet: PublicShipStatus[] = FLEET_SIZES.map((size) => ({ size, sunk: false }));
+    for (const shot of shots) {
+      if (shot.outcome !== 'sunk') continue;
+      const ship = fleet.find((entry) => !entry.sunk && entry.size === shot.sunkShipSize);
+      if (ship) ship.sunk = true;
+    }
+    return fleet;
   }
 
   private buildPublicBoard(fleet: Fleet | null, owner: PlayerId): PublicCell[] {

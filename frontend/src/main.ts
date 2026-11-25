@@ -2,19 +2,9 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, provideHttpClient } from '@angular/common/http';
 
-interface Coordinate { x: number; y: number }
-interface PublicCell extends Coordinate { state: 'empty' | 'ship' | 'hit' | 'miss' | 'sunk' }
-interface ShotRecord { coordinate: Coordinate; shooter: 'human' | 'bot'; outcome: 'hit' | 'miss' | 'sunk' }
+import type { Coordinate, PublicCell, PublicGameView, ShotRecord } from '@battleship/contracts';
+
 interface BotOption { id: string; label: string }
-interface PublicGameView {
-  id: string;
-  phase: 'setup' | 'playing' | 'finished';
-  currentTurn: 'human' | 'bot';
-  ownBoard: PublicCell[];
-  enemyBoard: PublicCell[];
-  winner: 'human' | 'bot' | null;
-  history: ShotRecord[];
-}
 
 @Component({
   selector: 'app-root',
@@ -54,17 +44,30 @@ interface PublicGameView {
       </section>
       <section>
         <h2>Поле противника</h2>
-        <div class="board">
-          @for (cell of game.enemyBoard; track $index) {
-            <button
-              class="cell enemy"
-              [class]="cell.state"
-              [class.last-hit]="highlight(cell, 'human', false)"
-              [class.last-miss]="highlight(cell, 'human', true)"
-              [disabled]="loading || game.phase !== 'playing' || game.currentTurn !== 'human' || cell.state === 'hit' || cell.state === 'miss' || cell.state === 'sunk'"
-              (click)="shoot(cell)"
-              [title]="cell.x + ',' + cell.y"></button>
-          }
+        <div class="enemy-layout">
+          <div class="board">
+            @for (cell of game.enemyBoard; track $index) {
+              <button
+                class="cell enemy"
+                [class]="cell.state"
+                [class.last-hit]="highlight(cell, 'human', false)"
+                [class.last-miss]="highlight(cell, 'human', true)"
+                [disabled]="loading || game.phase !== 'playing' || game.currentTurn !== 'human' || cell.state === 'hit' || cell.state === 'miss' || cell.state === 'sunk'"
+                (click)="shoot(cell)"
+                [title]="cell.x + ',' + cell.y"></button>
+            }
+          </div>
+          <div class="fleet-status">
+            <h3>Флот противника</h3>
+            <ul>
+              @for (ship of game.enemyFleetStatus; track $index) {
+                <li class="fleet-ship" [class.sunk]="ship.sunk">
+                  <span class="visually-hidden">{{ ship.size }} кл. — {{ ship.sunk ? 'потоплен' : 'на плаву' }}</span>
+                  <span class="fleet-strip" [style.--ship-size]="ship.size" aria-hidden="true"></span>
+                </li>
+              }
+            </ul>
+          </div>
         </div>
       </section>
     </div>

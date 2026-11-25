@@ -31,6 +31,11 @@ export interface PublicCell {
   state: 'empty' | 'ship' | 'hit' | 'miss' | 'sunk';
 }
 
+export interface PublicShipStatus {
+  size: number;
+  sunk: boolean;
+}
+
 export interface PublicGameView {
   id: string;
   phase: GamePhase;
@@ -38,6 +43,7 @@ export interface PublicGameView {
   humanFleet: Fleet | null;
   ownBoard: PublicCell[];
   enemyBoard: PublicCell[];
+  enemyFleetStatus: PublicShipStatus[];
   winner: PlayerId | null;
   history: ShotRecord[];
 }

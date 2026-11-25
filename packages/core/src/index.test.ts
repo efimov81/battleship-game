@@ -74,6 +74,35 @@ describe('GameSession', () => {
     expect(game.getPublicView().enemyBoard.every((cell) => cell.state !== 'ship')).toBe(true);
   });
 
+  it('reports each enemy ship by size and marks only confirmed human sinks', () => {
+    const humanFleet = new FleetGenerator(4).generate();
+    const botFleet = new FleetGenerator(5).generate();
+    const game = new GameSession({ humanFleet, botFleet, initialTurn: 'bot' });
+    const initial = game.start().enemyFleetStatus;
+    expect(initial).toEqual([4, 3, 3, 2, 2, 2, 1, 1, 1, 1].map((size) => ({ size, sunk: false })));
+
+    const single = humanFleet.ships.find((ship) => ship.cells.length === 1)!;
+    expect(game.shoot('bot', single.cells[0]).outcome).toBe('sunk');
+    const water = game.getPublicView().ownBoard.find((cell) => cell.state === 'empty')!;
+    expect(game.shoot('bot', { x: water.x, y: water.y }).outcome).toBe('miss');
+    expect(game.getPublicView().enemyFleetStatus).toEqual(initial);
+
+    const [first, second] = botFleet.ships.filter((ship) => ship.cells.length === 3);
+    expect(game.shoot('human', first.cells[0]).outcome).toBe('hit');
+    expect(game.getPublicView().enemyFleetStatus).toEqual(initial);
+
+    for (const cell of first.cells.slice(1)) game.shoot('human', cell);
+    expect(game.getPublicView().enemyFleetStatus).toEqual(
+      initial.map((ship, index) => ({ ...ship, sunk: index === 1 })),
+    );
+
+    for (const cell of second.cells) game.shoot('human', cell);
+    expect(game.getPublicView().enemyFleetStatus).toEqual(
+      initial.map((ship, index) => ({ ...ship, sunk: index === 1 || index === 2 })),
+    );
+    expect(new GameSession().getPublicView().enemyFleetStatus).toEqual(initial);
+  });
+
   it('can run a complete bot-vs-bot smoke simulation', () => {
     const random = new SeededRandom(99);
     const generator = new FleetGenerator(random);
