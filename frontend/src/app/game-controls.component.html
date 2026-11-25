@@ -1,0 +1,18 @@
+<div class="mb-4 flex flex-wrap gap-2">
+  <label>Сложность
+    <select #difficulty class="appearance-auto rounded-sm border border-game-control bg-white px-1 text-sm"
+      [value]="selectedBotId()" (change)="selectedBotIdChange.emit(difficulty.value)">
+      @for (bot of bots(); track bot.id) {
+        <option [value]="bot.id">{{ bot.label }}</option>
+      }
+    </select>
+  </label>
+  @if (phase() !== 'finished') {
+    <button type="button" class="game-button" (click)="newGame.emit()"
+      [disabled]="loading() || bots().length === 0">Новая игра</button>
+  }
+  <button type="button" class="game-button" (click)="randomize.emit()"
+    [disabled]="loading() || phase() !== 'setup'">Randomize</button>
+  <button type="button" class="game-button" (click)="start.emit()"
+    [disabled]="loading() || phase() !== 'setup'">Start</button>
+</div>

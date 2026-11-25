@@ -1,0 +1,14 @@
+<div class="grid grid-cols-[repeat(10,28px)] gap-0.5">
+  @for (cell of cells(); track $index) {
+    @let title = cell.x + ',' + cell.y;
+    @let marker = highlight(cell);
+    @if (enemy()) {
+      <button type="button" class="board-cell enabled:cursor-crosshair"
+        [attr.data-state]="cell.state" [attr.data-highlight]="marker" [title]="title"
+        [disabled]="!canShoot() || cell.state === 'hit' || cell.state === 'miss' || cell.state === 'sunk'"
+        (click)="fire.emit(cell)"></button>
+    } @else {
+      <div class="board-cell" [attr.data-state]="cell.state" [attr.data-highlight]="marker" [title]="title"></div>
+    }
+  }
+</div>

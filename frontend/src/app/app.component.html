@@ -1,0 +1,52 @@
+<main class="mx-auto my-8 max-w-[900px] p-4">
+  <h1 class="my-[0.67em] text-[2em] font-bold">Battleship Lab</h1>
+  <app-game-controls
+    [bots]="bots"
+    [selectedBotId]="selectedBotId"
+    [phase]="game?.phase ?? undefined"
+    [loading]="loading"
+    (selectedBotIdChange)="selectedBotId = $event"
+    (newGame)="newGame()"
+    (randomize)="randomize()"
+    (start)="start()"
+  />
+
+  @if (message) {
+    <p class="my-4 min-h-5 font-semibold">{{ message }}</p>
+  }
+  @if (game; as view) {
+    @if (view.phase === 'finished') {
+      <app-game-result
+        [game]="view"
+        [botLabel]="activeBotLabel"
+        [canRestart]="!loading && bots.length > 0"
+        (restart)="newGame()"
+      />
+    } @else {
+      <p class="my-4 min-h-5 font-semibold">
+        {{ activeBotLabel }} ·
+        @if (view.phase === 'setup') { Place your fleet, then start }
+        @if (view.phase === 'playing') { {{ view.currentTurn === 'human' ? 'Ваш ход' : 'Ход бота...' }} }
+      </p>
+    }
+    <div class="flex flex-wrap gap-6">
+      <section class="mr-8">
+        <h2 class="my-[0.83em] text-[1.5em] font-bold">Ваше поле</h2>
+        <app-battle-board [cells]="view.ownBoard" [lastShot]="lastShot" />
+      </section>
+      <section class="mr-8">
+        <h2 class="my-[0.83em] text-[1.5em] font-bold">Поле противника</h2>
+        <div class="flex flex-wrap items-start gap-4">
+          <app-battle-board
+            enemy
+            [cells]="view.enemyBoard"
+            [lastShot]="lastShot"
+            [canShoot]="!loading && view.phase === 'playing' && view.currentTurn === 'human'"
+            (fire)="shoot($event)"
+          />
+          <app-fleet-status [ships]="view.enemyFleetStatus" />
+        </div>
+      </section>
+    </div>
+  }
+</main>

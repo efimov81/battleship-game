@@ -1,0 +1,10 @@
+<h3 class="mb-2 text-sm font-bold">Флот противника</h3>
+<ul class="grid gap-1.5" role="list">
+  @for (ship of ships(); track $index) {
+    <li>
+      <span class="sr-only">{{ ship.size }} кл. — {{ ship.sunk ? 'потоплен' : 'на плаву' }}</span>
+      <span class="fleet-strip" [style.--ship-size]="ship.size"
+        [attr.data-sunk]="ship.sunk" aria-hidden="true"></span>
+    </li>
+  }
+</ul>

@@ -1,159 +1,46 @@
-body {
-  font-family: system-ui, sans-serif;
-  margin: 0;
-  background: #f3f6fa;
-  color: #172b42;
+@import "tailwindcss" source(".");
+
+@theme {
+  --color-game-page: #f3f6fa;
+  --color-game-text: #172b42;
+  --color-game-control: #839bb5;
+  --color-game-border: #aabbd0;
+  --color-cell-empty: #d7e2ee;
+  --color-cell-ship: #6689ad;
+  --color-cell-hit: #f5a623;
+  --color-cell-sunk: #d84a4a;
+  --color-cell-miss: #eef3f7;
+  --color-miss-dot: #526b86;
+  --color-highlight-hit: #a82820;
+  --color-highlight-miss: #2462a7;
 }
 
-main {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 1rem;
+@layer base {
+  body {
+    @apply bg-game-page font-sans text-game-text;
+  }
 }
 
-section {
-  display: inline-block;
-  vertical-align: top;
-  margin-right: 2rem;
-}
+@layer components {
+  .game-button {
+    @apply cursor-pointer rounded-sm border border-game-control bg-white px-3 py-[0.45rem] text-sm
+      disabled:cursor-default disabled:opacity-55;
+  }
 
-.controls {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
+  .board-cell {
+    @apply grid size-7 place-items-center border border-game-border bg-cell-empty p-0
+      data-[state=ship]:bg-cell-ship data-[state=hit]:bg-cell-hit
+      data-[state=sunk]:bg-cell-sunk data-[state=miss]:bg-cell-miss
+      data-[state=miss]:after:size-1.5 data-[state=miss]:after:rounded-full
+      data-[state=miss]:after:bg-miss-dot data-[state=miss]:after:content-['']
+      data-highlight:outline-2 data-highlight:-outline-offset-2
+      data-[highlight=hit]:outline-highlight-hit data-[highlight=miss]:outline-highlight-miss
+      disabled:opacity-55 disabled:data-highlight:opacity-100;
+  }
 
-button {
-  border: 1px solid #839bb5;
-  border-radius: 4px;
-  background: white;
-  color: #172b42;
-  padding: 0.45rem 0.75rem;
-  cursor: pointer;
-}
-
-button:disabled {
-  cursor: default;
-  opacity: 0.55;
-}
-
-.boards {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-}
-
-.status,
-.message {
-  min-height: 1.25rem;
-  font-weight: 600;
-}
-
-.board {
-  display: grid;
-  grid-template-columns: repeat(10, 28px);
-  gap: 2px;
-}
-
-.cell {
-  width: 28px;
-  height: 28px;
-  background: #d7e2ee;
-  border: 1px solid #aabbd0;
-  box-sizing: border-box;
-  padding: 0;
-  border-radius: 0;
-}
-
-.cell.enemy:not(:disabled) {
-  cursor: crosshair;
-}
-
-.cell.ship {
-  background: #6689ad;
-}
-
-.cell.hit {
-  background: #f5a623;
-}
-
-.cell.sunk {
-  background: #d84a4a;
-}
-
-.cell.miss {
-  background: #eef3f7;
-  position: relative;
-}
-
-.cell.miss::after {
-  content: "";
-  display: block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #526b86;
-  margin: 10px auto;
-}
-.cell.last-hit {
-  outline: 2px solid #a82820;
-  outline-offset: -2px;
-  opacity: 1;
-}
-
-.cell.last-miss {
-  outline: 2px solid #2462a7;
-  outline-offset: -2px;
-  opacity: 1;
-}
-
-.enemy-layout {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 1rem;
-}
-
-.fleet-status h3 {
-  margin: 0 0 0.5rem;
-  font-size: 0.875rem;
-}
-
-.fleet-status ul {
-  display: grid;
-  gap: 0.375rem;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.fleet-ship {
-  --fleet-ship-color: white;
-}
-
-.fleet-ship.sunk {
-  --fleet-ship-color: #d84a4a;
-}
-
-.fleet-strip {
-  display: block;
-  width: calc(var(--ship-size) * 18px + 1px);
-  height: 18px;
-  box-sizing: border-box;
-  border-block: 1px solid #839bb5;
-  border-inline-end: 1px solid #839bb5;
-  background: repeating-linear-gradient(
-    to right,
-    #839bb5 0 1px,
-    var(--fleet-ship-color) 1px 18px
-  );
-}
-
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+  .fleet-strip {
+    @apply block h-[18px] w-[calc(var(--ship-size)*18px+1px)] border-y border-r border-game-control
+      [--ship-color:white] data-[sunk=true]:[--ship-color:var(--color-cell-sunk)]
+      bg-[repeating-linear-gradient(to_right,var(--color-game-control)_0_1px,var(--ship-color)_1px_18px)];
+  }
 }

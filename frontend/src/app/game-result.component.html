@@ -1,0 +1,15 @@
+<section class="mb-6 rounded-lg border border-game-border bg-white p-5" aria-labelledby="game-result-title">
+  <h2 id="game-result-title" class="text-[1.5em] font-bold">
+    {{ game().winner === 'human' ? 'Вы победили!' : 'Победил бот' }}
+  </h2>
+  <p class="my-4">Сложность: {{ botLabel() }}</p>
+  <dl class="my-4 flex flex-wrap gap-x-6 gap-y-4" aria-label="Статистика партии">
+    @for (item of stats(); track item.label) {
+      <div>
+        <dt>{{ item.label }}</dt>
+        <dd class="mt-1 text-xl font-semibold">{{ item.value }}</dd>
+      </div>
+    }
+  </dl>
+  <button type="button" class="game-button" (click)="restart.emit()" [disabled]="!canRestart()">Новая игра</button>
+</section>
