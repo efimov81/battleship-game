@@ -51,4 +51,25 @@ Run `npm test` to check the game engine, API and bots, and frontend localization
 - `packages/core` — game rules, fleet generation, and game sessions.
 - `packages/contracts` — shared TypeScript types for the API and game engine.
 
+
+## AI-Assisted Development
+
+Battleship Lab was developed as a practical experiment in AI-assisted software engineering using **OpenAI Codex**.
+
+The project explores how AI coding agents can contribute to full-stack development while working within explicit architectural constraints, coding standards, and verification requirements.
+
+The development workflow includes:
+
+- **OpenAI Codex** for implementation, refactoring, UI improvements, localization, and automated testing.
+- **AGENTS.md** for repository-level instructions, development conventions, and architectural boundaries.
+- **Agent Skills** for specialized Angular, API, and testing guidance.
+- **Task-driven development** using versioned Markdown specifications in `docs/tasks/`.
+- **Human-in-the-loop development**, including technical decision-making, code review, functional testing, and acceptance of changes.
+- **AI-assisted UI/UX development**, including responsive layouts, interactive feedback, accessibility considerations, and bilingual localization.
+
+The application uses a conventional TypeScript game engine and algorithmic computer opponents. **Gameplay does not depend on an LLM or external AI inference API.**
+
+The goal of the experiment is to evaluate the effectiveness of AI coding agents in a structured software engineering workflow, rather than to introduce AI where deterministic algorithms are sufficient.
+
+
 See the [game rules](docs/GAME_RULES.md), [API reference](docs/API.md), and [architecture overview](docs/ARCHITECTURE.md).
