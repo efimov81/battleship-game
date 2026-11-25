@@ -1,14 +1,22 @@
-<div class="grid grid-cols-[repeat(10,28px)] gap-0.5">
+<div class="board-grid">
+  <span aria-hidden="true"></span>
+  @for (column of columns; track column) {
+    <span class="board-axis" aria-hidden="true">{{ column }}</span>
+  }
   @for (cell of cells(); track $index) {
-    @let title = cell.x + ',' + cell.y;
+    @if (cell.x === 0) {
+      <span class="board-axis" aria-hidden="true">{{ cell.y + 1 }}</span>
+    }
     @let marker = highlight(cell);
+    @let label = cellLabel(cell);
     @if (enemy()) {
       <button type="button" class="board-cell enabled:cursor-crosshair"
-        [attr.data-state]="cell.state" [attr.data-highlight]="marker" [title]="title"
+        [attr.data-state]="cell.state" [attr.data-highlight]="marker" [attr.aria-label]="label" [title]="label"
         [disabled]="!canShoot() || cell.state === 'hit' || cell.state === 'miss' || cell.state === 'sunk'"
         (click)="fire.emit(cell)"></button>
     } @else {
-      <div class="board-cell" [attr.data-state]="cell.state" [attr.data-highlight]="marker" [title]="title"></div>
+      <div class="board-cell" [attr.data-state]="cell.state" [attr.data-highlight]="marker"
+        [title]="label"><span class="sr-only">{{ label }}</span></div>
     }
   }
 </div>

@@ -2,6 +2,14 @@ import { booleanAttribute, ChangeDetectionStrategy, Component, computed, input, 
 
 import type { Coordinate, PublicCell, ShotRecord } from '@battleship/contracts';
 
+const CELL_LABELS: Record<PublicCell['state'], string> = {
+  empty: '',
+  ship: 'корабль',
+  hit: 'попадание',
+  miss: 'промах',
+  sunk: 'потоплен',
+};
+
 @Component({
   selector: 'app-battle-board',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -14,10 +22,18 @@ export class BattleBoardComponent {
   readonly lastShot = input<ShotRecord>();
   readonly fire = output<Coordinate>();
 
+  protected readonly columns = 'ABCDEFGHIJ'.split('');
+
   private readonly boardShot = computed(() => {
     const shot = this.lastShot();
     return shot?.shooter === (this.enemy() ? 'human' : 'bot') ? shot : undefined;
   });
+
+  protected cellLabel(cell: PublicCell): string {
+    const coordinate = this.columns[cell.x] + (cell.y + 1);
+    const state = CELL_LABELS[cell.state];
+    return state ? `${coordinate}, ${state}` : coordinate;
+  }
 
   protected highlight(cell: Coordinate): 'hit' | 'miss' | null {
     const shot = this.boardShot();

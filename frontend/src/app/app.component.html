@@ -1,5 +1,11 @@
-<main class="mx-auto my-8 max-w-[900px] p-4">
-  <h1 class="my-[0.67em] text-[2em] font-bold">Battleship Lab</h1>
+<header class="border-b border-line bg-deep/90">
+  <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-4 sm:px-8">
+    <span class="brand-scope" aria-hidden="true"></span>
+    <h1 class="text-lg font-bold tracking-tight sm:text-xl">Морской бой</h1>
+  </div>
+</header>
+
+<main class="mx-auto flex max-w-7xl flex-col gap-5 px-3 py-5 sm:px-8 sm:py-8">
   <app-game-controls
     [bots]="bots"
     [selectedBotId]="selectedBotId"
@@ -12,8 +18,9 @@
   />
 
   @if (message) {
-    <p class="my-4 min-h-5 font-semibold">{{ message }}</p>
+    <p class="rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger" role="alert">{{ message }}</p>
   }
+
   @if (game; as view) {
     @if (view.phase === 'finished') {
       <app-game-result
@@ -23,20 +30,31 @@
         (restart)="newGame()"
       />
     } @else {
-      <p class="my-4 min-h-5 font-semibold">
-        {{ activeBotLabel }} ·
-        @if (view.phase === 'setup') { Place your fleet, then start }
-        @if (view.phase === 'playing') { {{ view.currentTurn === 'human' ? 'Ваш ход' : 'Ход бота...' }} }
-      </p>
+      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-lg border border-line bg-panel px-4 py-3">
+        <div class="flex items-center gap-3" role="status" aria-atomic="true">
+          <span class="size-2 shrink-0 rounded-full bg-signal shadow-[0_0_12px_var(--color-signal)]" aria-hidden="true"></span>
+          <div>
+            @if (view.phase === 'setup') {
+              <p class="text-sm font-semibold">Подготовка к бою</p>
+              <p class="text-sm text-muted">
+                {{ view.humanFleet ? 'Флот готов. Начните бой или расставьте корабли заново.' : 'Расставьте корабли перед началом боя.' }}
+              </p>
+            } @else {
+              <p class="text-sm font-semibold">{{ view.currentTurn === 'human' ? 'Ваш ход' : 'Ход противника' }}</p>
+              <p class="text-sm text-muted">
+                {{ view.currentTurn === 'human' ? (loading ? 'Выстрел выполняется…' : 'Выберите клетку на поле противника.') : 'Ожидайте выстрела бота.' }}
+              </p>
+            }
+          </div>
+        </div>
+        <p class="shrink-0 font-mono text-xs text-muted">Сложность · {{ activeBotLabel }}</p>
+      </div>
     }
-    <div class="flex flex-wrap gap-6">
-      <section class="mr-8">
-        <h2 class="my-[0.83em] text-[1.5em] font-bold">Ваше поле</h2>
-        <app-battle-board [cells]="view.ownBoard" [lastShot]="lastShot" />
-      </section>
-      <section class="mr-8">
-        <h2 class="my-[0.83em] text-[1.5em] font-bold">Поле противника</h2>
-        <div class="flex flex-wrap items-start gap-4">
+
+    <div class="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_14rem]">
+      <section class="sector border-danger/30" aria-labelledby="enemy-title">
+        <h2 id="enemy-title" class="sector-title"><span class="bg-danger" aria-hidden="true"></span>Поле противника</h2>
+        <div class="sector-body text-danger">
           <app-battle-board
             enemy
             [cells]="view.enemyBoard"
@@ -44,9 +62,38 @@
             [canShoot]="!loading && view.phase === 'playing' && view.currentTurn === 'human'"
             (fire)="shoot($event)"
           />
-          <app-fleet-status [ships]="view.enemyFleetStatus" />
         </div>
       </section>
+      <section class="sector border-signal/30 md:order-first" aria-labelledby="own-title">
+        <h2 id="own-title" class="sector-title"><span class="bg-signal" aria-hidden="true"></span>Ваше поле</h2>
+        <div class="sector-body text-signal">
+          <app-battle-board [cells]="view.ownBoard" [lastShot]="lastShot" />
+        </div>
+      </section>
+      <aside class="sector md:col-span-2 xl:col-span-1" aria-labelledby="fleet-title">
+        <app-fleet-status [ships]="view.enemyFleetStatus" />
+        <div class="border-t border-line px-4 py-4">
+          <h3 class="mb-3 text-xs font-semibold tracking-wider text-muted uppercase">Обозначения</h3>
+          <ul class="grid grid-cols-2 gap-3 text-xs text-muted xl:grid-cols-1">
+            <li class="flex items-center gap-2"><span class="board-cell size-5" data-state="ship" aria-hidden="true"></span>Корабль</li>
+            <li class="flex items-center gap-2"><span class="board-cell size-5" data-state="hit" aria-hidden="true"></span>Попадание</li>
+            <li class="flex items-center gap-2"><span class="board-cell size-5" data-state="miss" aria-hidden="true"></span>Промах</li>
+            <li class="flex items-center gap-2"><span class="board-cell size-5" data-state="sunk" aria-hidden="true"></span>Потоплен</li>
+          </ul>
+        </div>
+      </aside>
     </div>
+  } @else {
+    <section class="sector grid min-h-96 place-items-center gap-6 px-5 py-9 text-center sm:min-h-[29rem]" aria-labelledby="ready-title">
+      <div class="space-y-6">
+        <div class="radar mx-auto" aria-hidden="true"><span></span></div>
+        <div class="space-y-2">
+          <h2 id="ready-title" class="text-2xl font-bold tracking-tight sm:text-3xl">{{ loading ? 'Создаём партию…' : 'Подготовка к бою' }}</h2>
+          @if (!loading) {
+            <p class="mx-auto max-w-xs text-sm text-muted">Выберите сложность и нажмите «Новая игра», чтобы перейти к расстановке флота.</p>
+          }
+        </div>
+      </div>
+    </section>
   }
 </main>

@@ -1,15 +1,21 @@
-<section class="mb-6 rounded-lg border border-game-border bg-white p-5" aria-labelledby="game-result-title">
-  <h2 id="game-result-title" class="text-[1.5em] font-bold">
-    {{ game().winner === 'human' ? 'Вы победили!' : 'Победил бот' }}
-  </h2>
-  <p class="my-4">Сложность: {{ botLabel() }}</p>
-  <dl class="my-4 flex flex-wrap gap-x-6 gap-y-4" aria-label="Статистика партии">
+<section class="sector border-l-4" [class.border-l-signal]="game().winner === 'human'"
+  [class.border-l-danger]="game().winner === 'bot'" aria-labelledby="game-result-title">
+  <div class="flex flex-wrap items-center justify-between gap-4 px-4 py-5 sm:px-6">
+    <div role="status">
+      <h2 id="game-result-title" class="text-2xl font-bold tracking-tight sm:text-3xl">
+        {{ game().winner === 'human' ? 'Вы победили!' : 'Победил бот' }}
+      </h2>
+      <p class="mt-1 text-sm text-muted">Сложность · {{ botLabel() }}</p>
+    </div>
+    <button type="button" class="game-button button-primary w-full sm:w-auto" (click)="restart.emit()"
+      [disabled]="!canRestart()">Новая игра</button>
+  </div>
+  <dl class="grid grid-cols-2 gap-px border-t border-line bg-line sm:grid-cols-5" aria-label="Статистика партии">
     @for (item of stats(); track item.label) {
-      <div>
-        <dt>{{ item.label }}</dt>
-        <dd class="mt-1 text-xl font-semibold">{{ item.value }}</dd>
+      <div class="flex flex-col gap-1 bg-deep px-4 py-3 last:col-span-2 sm:px-5 sm:last:col-span-1">
+        <dt class="text-xs text-muted">{{ item.label }}</dt>
+        <dd class="order-first font-mono text-xl font-semibold text-signal">{{ item.value }}</dd>
       </div>
     }
   </dl>
-  <button type="button" class="game-button" (click)="restart.emit()" [disabled]="!canRestart()">Новая игра</button>
 </section>
