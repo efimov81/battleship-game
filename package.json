@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "build": "npm run build -w @battleship/contracts && npm run build -w @battleship/core && npm run build -w @battleship/backend && npm run build -w @battleship/frontend",
-    "test": "npm run build -w @battleship/contracts && npm run build -w @battleship/core && npm run test -w @battleship/core && npm run test -w @battleship/backend",
+    "test": "npm run build -w @battleship/contracts && npm run build -w @battleship/core && npm run test -w @battleship/core && npm run test -w @battleship/backend && npm run test -w @battleship/frontend",
     "dev:api": "npm run dev -w @battleship/backend",
     "dev:web": "npm run start -w @battleship/frontend"
   },

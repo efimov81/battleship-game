@@ -1,14 +1,7 @@
-import { booleanAttribute, ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { booleanAttribute, ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 
 import type { Coordinate, PublicCell, ShotRecord } from '@battleship/contracts';
-
-const CELL_LABELS: Record<PublicCell['state'], string> = {
-  empty: '',
-  ship: 'корабль',
-  hit: 'попадание',
-  miss: 'промах',
-  sunk: 'потоплен',
-};
+import { LocalizationService } from './localization/localization.service';
 
 @Component({
   selector: 'app-battle-board',
@@ -16,6 +9,8 @@ const CELL_LABELS: Record<PublicCell['state'], string> = {
   templateUrl: './battle-board.component.html',
 })
 export class BattleBoardComponent {
+  protected readonly locale = inject(LocalizationService);
+
   readonly cells = input.required<readonly PublicCell[]>();
   readonly enemy = input(false, { transform: booleanAttribute });
   readonly canShoot = input(false);
@@ -31,8 +26,7 @@ export class BattleBoardComponent {
 
   protected cellLabel(cell: PublicCell): string {
     const coordinate = this.columns[cell.x] + (cell.y + 1);
-    const state = CELL_LABELS[cell.state];
-    return state ? `${coordinate}, ${state}` : coordinate;
+    return cell.state === 'empty' ? coordinate : `${coordinate}, ${this.locale.messages()[cell.state]}`;
   }
 
   protected highlight(cell: Coordinate): 'hit' | 'miss' | null {

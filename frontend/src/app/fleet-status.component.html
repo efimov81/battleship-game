@@ -1,10 +1,12 @@
-<h3 id="fleet-title" class="sector-title">Флот противника</h3>
+@let t = locale.messages();
+
+<h3 id="fleet-title" class="sector-title">{{ t.enemyFleet }}</h3>
 <div class="px-4 py-4">
-  <p class="mb-3 text-sm text-muted">Потоплено <strong class="font-mono font-semibold text-danger">{{ sunkCount() }}/{{ ships().length }}</strong></p>
+  <p class="mb-3 text-sm text-muted">{{ t.fleetSunk }} <strong class="font-mono font-semibold text-danger">{{ sunkCount() }}/{{ ships().length }}</strong></p>
   <ul class="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-4 xl:grid-cols-2" role="list">
     @for (ship of ships(); track $index) {
       <li>
-        <span class="sr-only">{{ ship.size }} кл. — {{ ship.sunk ? 'потоплен' : 'на плаву' }}</span>
+        <span class="sr-only">{{ ship.size }} {{ t.cells }} — {{ ship.sunk ? t.sunk : t.afloat }}</span>
         <span class="fleet-strip" [style.--ship-size]="ship.size"
           [attr.data-sunk]="ship.sunk" aria-hidden="true"></span>
       </li>

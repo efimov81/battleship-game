@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "ng serve --host 127.0.0.1",
-    "build": "ng build"
+    "build": "ng build",
+    "test": "vitest run"
   },
   "dependencies": {
     "@angular/common": "^20.3.0",
